@@ -59,6 +59,9 @@ public class DataBank {
             result.put(paymentMethodId, new BigDecimal(0));
         }
         for (Order order : orders) {
+            if ( order.getPromotions() == null || order.getPromotions().isEmpty()) {
+                continue;
+            }
             for (String paymentMethodId : order.getPromotions()) {
                 result.put(paymentMethodId, result.get(paymentMethodId).add(order.getValue()));
             }
@@ -71,13 +74,10 @@ public class DataBank {
         BigDecimal maximalWorth = new BigDecimal(0);
         for (String paymentMethodId : unusedPaymentMethodIds) {
             Promotion paymentMethod = this.getPaymentMethod(paymentMethodId);
+//            Calculating how much discount we can get for this Payment Methode
             BigDecimal newMaximalWorth = paymentMethod.getLimit().multiply(paymentMethod.getDiscount());
             BigDecimal discountedMaxOrderAmount = maxOrdersAmountPerPaymentMethod.get(paymentMethodId).multiply(paymentMethod.getDiscount());
-            newMaximalWorth = newMaximalWorth.min(discountedMaxOrderAmount); // This assumes newMaximalWorth is already a BigDecimal.
-
-            BigDecimal calculatedWorth = paymentMethod.getLimit().multiply(paymentMethod.getDiscount());
-            BigDecimal cappedWorth = maxOrdersAmountPerPaymentMethod.get(paymentMethodId).multiply(paymentMethod.getDiscount());
-            newMaximalWorth = calculatedWorth.min(cappedWorth);
+            if (discountedMaxOrderAmount.compareTo(newMaximalWorth) < 0) {newMaximalWorth = discountedMaxOrderAmount;}
 
             if (newMaximalWorth.compareTo(maximalWorth) > 0) {
                 maximalWorth = newMaximalWorth;
@@ -86,6 +86,9 @@ public class DataBank {
         }
         Set<Integer> selectedOrders = new HashSet<>();
         for (Integer orderId : unusedOrders) {
+            if ( this.getOrder(orderId).getPromotions() == null || this.getOrder(orderId).getPromotions().isEmpty()) {
+                continue;
+            }
             if (this.getOrder(orderId).getPromotions().contains(selectedPaymentMethod)) {
                 selectedOrders.add(orderId);
             }

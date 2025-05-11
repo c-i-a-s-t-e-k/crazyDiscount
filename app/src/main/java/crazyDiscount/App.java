@@ -3,45 +3,22 @@
  */
 package crazyDiscount;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+
 import java.util.Map;
 
 public class App {
 
-    // Hardcoded resource file paths
-    private static final String DEFAULT_ORDERS_PATH = "app/src/test/resources/orders.json";
-    private static final String DEFAULT_PAYMENT_METHODS_PATH = "app/src/test/resources/paymentmethods.json";
-
-    
     public static void main(String[] args) {
-        if (args.length < 2) {
-            System.out.println("Usage: java -jar app.jar <orders_json_path> <payment_methods_json_path>");
-            return;
-        }
-        
-        String ordersPath = args[0];
-        String paymentMethodsPath = args[1];
-        
-        try {
-            OrdersBank ordersBank = new OrdersBank(ordersPath);
-            PaymentsMethodsBank paymentsMethodsBank = new PaymentsMethodsBank(paymentMethodsPath);
-            
-            System.out.println("Successfully loaded orders and payment methods!");
-            System.out.println("Orders data: " + ordersBank.getOrders());
-            System.out.println("Payment methods data: " + paymentsMethodsBank.getPaymentMethods());
-        } catch (IOException e) {
-            System.err.println("Error loading JSON files: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    
+        ClassLoader classLoader = App.class.getClassLoader();
+        File ordersFile = new File(classLoader.getResource("orders.json").getFile());
+        File paymentMethodsFile = new File(classLoader.getResource("paymentmethods.json").getFile());
 
-    public static void main(String[] args) {
-        // Use command-line arguments if provided, otherwise use hardcoded paths
-        String ordersPath = (args.length >= 1) ? args[0] : DEFAULT_ORDERS_PATH;
-        String paymentMethodsPath = (args.length >= 2) ? args[1] : DEFAULT_PAYMENT_METHODS_PATH;
-        
+        String ordersPath = ordersFile.getAbsolutePath();
+        String paymentMethodsPath = paymentMethodsFile.getAbsolutePath();
+
         System.out.println("Using orders file: " + ordersPath);
         System.out.println("Using payment methods file: " + paymentMethodsPath);
         
@@ -51,8 +28,11 @@ public class App {
             System.out.println("Successfully loaded orders and payment methods!");
             
             // Create and run the optimizer
-            DiscountOptimalizer optimizer = new OptimalizationObserver(dataBank);
+            // System.out.println("Starting optimization...");
+            DiscountOptimalizer optimizer = new HeuristicOptimizer(dataBank);
+            // System.out.println("Optimizing...");
             optimizer.optimalize();
+            // System.out.println("Optimization complete!");
             
             // Get and display optimization results
             Map<String, BigDecimal> optimizedCosts = optimizer.getPaymentMethodOptimalizatedCosts();

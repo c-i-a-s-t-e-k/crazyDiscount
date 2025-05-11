@@ -5,7 +5,6 @@ import com.google.ortools.Loader;
 import com.google.ortools.algorithms.KnapsackSolver;
 import java.util.ArrayList;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -14,7 +13,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import crazyDiscount.model.Order;
 import crazyDiscount.model.Promotion;
 
-public class OptimalizationObserver implements DiscountOptimalizer {
+public class HeuristicOptimizer implements DiscountOptimalizer {
     static {
         try {
             Loader.loadNativeLibraries();
@@ -30,7 +29,7 @@ public class OptimalizationObserver implements DiscountOptimalizer {
     private Map<String, BigDecimal> maxOrdersAmountPerPaymentMethod;
     private DataBank dataBank;
 
-    public OptimalizationObserver(DataBank dataBank) {
+    public HeuristicOptimizer(DataBank dataBank) {
         this.calculatedOrders = new HashSet<>();
         this.usedPaymentMethods = new HashSet<>();
         this.paymentUsageAmount = new HashMap<>();

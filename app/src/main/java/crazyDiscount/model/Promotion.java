@@ -15,7 +15,7 @@ public class Promotion {
     // Constructor with all fields
     public Promotion(String id, BigDecimal discount, BigDecimal limit) {
         this.id = id;
-        this.discount = discount;
+        this.discount = discount.multiply(new BigDecimal("0.01"));
         this.limit = limit;
     }
 
@@ -33,7 +33,7 @@ public class Promotion {
     }
 
     public void setDiscount(BigDecimal discount) {
-        this.discount = discount;
+        this.discount = discount.multiply(new BigDecimal("0.01"));
     }
 
     public BigDecimal getLimit() {
