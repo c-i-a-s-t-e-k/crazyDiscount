@@ -69,4 +69,12 @@ public class OptimalizationTest {
         optimalizer.optimalize();
         assertTrue(optimalizer.isOptimalized());
     }
+
+    @Test
+    public void testBruteForceOptimalization() {
+        DiscountOptimalizer optimalizer = new BruteForceOptimizer(dataBank);
+        assertFalse(optimalizer.isOptimalized());
+        optimalizer.optimalize();
+        assertTrue(optimalizer.isOptimalized());
+    }
 }

@@ -1,15 +1,12 @@
 package crazyDiscount;
 
 import java.awt.desktop.SystemSleepEvent;
-import java.util.Set;
+import java.util.*;
+
 import com.google.ortools.Loader;
 import com.google.ortools.algorithms.KnapsackSolver;
-import java.util.ArrayList;
+
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -96,15 +93,28 @@ public class HeuristicOptimizer implements DiscountOptimalizer {
         return selectedOrderIds;
     }
 
+    private List<Pair<String, BigDecimal>> getSortedMoneyLeft(){
+        List<Pair<String, BigDecimal>> moneyLeft = new ArrayList<>();
+        for (String paymentId: dataBank.getPaymentMethodsIds()){
+            moneyLeft.add(Pair.of(
+                    paymentId,
+                    dataBank.getPaymentMethod(paymentId).getLimit().subtract(
+                            this.paymentUsageAmount.get(paymentId)
+                    ))
+            );
+        }
+
+        moneyLeft.sort((p1, p2) -> p2.getRight().compareTo(p1.getRight()));
+        System.out.println(moneyLeft);
+        return moneyLeft;
+    }
+
     private void spendLoyaltyPoints(){
         // calculating special offert with loyalty points (10% discount for at least 10% loyalty points)
-//        BigDecimal loyaltyPoints = dataBank.getPaymentMethod(dataBank.LOYALTY_POINTS_DISCOUNT_NAME).getLimit()
-//                .subtract(paymentUsageAmount.get(dataBank.LOYALTY_POINTS_DISCOUNT_NAME));
-//        if (loyaltyPoints.compareTo(BigDecimal.ZERO) > 0) {
-//            for (Integer orderId : this.uncalculatedOrders) {
-//
-//            }
-//        }
+        BigDecimal loyaltyPoints = dataBank.getPaymentMethod(dataBank.LOYALTY_POINTS_DISCOUNT_NAME).getLimit()
+                .subtract(paymentUsageAmount.get(dataBank.LOYALTY_POINTS_DISCOUNT_NAME));
+        List<Pair<String, BigDecimal>> moneyLeft = getSortedMoneyLeft();
+
     }
 
     @Override

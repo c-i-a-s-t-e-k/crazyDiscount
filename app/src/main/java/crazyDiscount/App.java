@@ -29,7 +29,7 @@ public class App {
             
             // Create and run the optimizer
             // System.out.println("Starting optimization...");
-            DiscountOptimalizer optimizer = new HeuristicOptimizer(dataBank);
+            DiscountOptimalizer optimizer = new BruteForceOptimizer(dataBank);
             // System.out.println("Optimizing...");
             optimizer.optimalize();
             // System.out.println("Optimization complete!");

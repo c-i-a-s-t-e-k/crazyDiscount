@@ -19,6 +19,7 @@ import crazyDiscount.model.Promotion;
 public class DataBank {
     public final String LOYALTY_POINTS_DISCOUNT_NAME = "PUNKTY";
     public final BigDecimal LOYALTY_POINTS_DISCOUNT = new BigDecimal("0.10");
+    public final BigDecimal LOYALTY_DISCOUNT_START_PERCENTAGE = new BigDecimal("0.10");
     private final List<Order> orders;
     private final Map<String, Promotion> paymentMethods;
 
