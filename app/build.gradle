@@ -36,3 +36,14 @@ application {
     mainClass = 'crazyDiscount.App'
 //    applicationDefaultJvmArgs = ["-Xss1024m"]
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'crazyDiscount.App'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    // To avoid duplicate entry errors
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

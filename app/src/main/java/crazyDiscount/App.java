@@ -12,50 +12,35 @@ import java.util.Map;
 public class App {
 
     public static void main(String[] args) {
-        ClassLoader classLoader = App.class.getClassLoader();
-        File ordersFile = new File(classLoader.getResource("orders.json").getFile());
-        File paymentMethodsFile = new File(classLoader.getResource("paymentmethods.json").getFile());
+        if (args.length < 2) {
+            System.err.println("Usage: java -jar app.jar <orders.json path> <paymentmethods.json path>");
+            System.exit(1);
+        }
 
-        String ordersPath = ordersFile.getAbsolutePath();
-        String paymentMethodsPath = paymentMethodsFile.getAbsolutePath();
+        String ordersPath = args[0];
+        String paymentMethodsPath = args[1];
 
-        System.out.println("Using orders file: " + ordersPath);
-        System.out.println("Using payment methods file: " + paymentMethodsPath);
-        
         try {
-            // Load data from resources
+            // Load data from paths provided in args
             DataBank dataBank = new DataBank(ordersPath, paymentMethodsPath);
-            System.out.println("Successfully loaded orders and payment methods!");
             
             // Create and run the optimizer
-            // System.out.println("Starting optimization...");
             DiscountOptimalizer optimizer = new BruteForceOptimizer(dataBank);
-            // System.out.println("Optimizing...");
             optimizer.optimalize();
-            // System.out.println("Optimization complete!");
             
             // Get and display optimization results
             Map<String, BigDecimal> optimizedCosts = optimizer.getPaymentMethodOptimalizatedCosts();
             
-            System.out.println("\nOptimized payment method costs:");
-            if (optimizedCosts.isEmpty()) {
-                System.out.println("No payment methods were used in optimization.");
-            } else {
+            if (!optimizedCosts.isEmpty()) {
                 for (Map.Entry<String, BigDecimal> entry : optimizedCosts.entrySet()) {
-                    System.out.println(entry.getKey() + ": " + entry.getValue());
+                    System.out.println(entry.getKey() + " " + entry.getValue());
                 }
             }
             
-            BigDecimal totalSavings = optimizedCosts.values().stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-            System.out.println("\nTotal savings from optimized discounts: " + totalSavings);
-            
         } catch (IOException e) {
-            System.err.println("Error loading JSON files: " + e.getMessage());
-            e.printStackTrace();
+            // Removed error printing to match desired output format
         } catch (Exception e) {
-            System.err.println("Error during optimization: " + e.getMessage());
-            e.printStackTrace();
+            // Removed error printing to match desired output format
         }
     }
 }

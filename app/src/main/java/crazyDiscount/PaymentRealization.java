@@ -18,6 +18,8 @@ public class PaymentRealization {
         this(orderId, paymentMethod, BigDecimal.ZERO);
     }
 
+
+
     public void addLoyalityDiscount(DataBank bank) {
         if (loyaltyPoints.compareTo(BigDecimal.ZERO) == 0) {
         this.loyaltyPoints = loyaltyPoints.add(this.getOrderValue(bank).multiply(bank.LOYALTY_POINTS_DISCOUNT));

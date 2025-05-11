@@ -26,25 +26,20 @@ public class BruteForceOptimizer implements DiscountOptimalizer{
         return sum;
     }
 
-    private void updatePaymentsState(HashMap<String, BigDecimal> paymentsState, PaymentRealization bestPayment){
-        if(Objects.equals(bestPayment, null)){
+    private void updatePaymentsState(HashMap<String, BigDecimal> paymentsState, PaymentRealization bestPayment) {
+        if (Objects.equals(bestPayment, null)) {
             throw new RuntimeException("There is no payment that can be found");
         }
-        if(bestPayment.isPartialLoyaltyPoints(dataBank)){
-            paymentsState.put(dataBank.LOYALTY_POINTS_DISCOUNT_NAME,
-                    paymentsState.get(dataBank.LOYALTY_POINTS_DISCOUNT_NAME).subtract(bestPayment.getLoyaltyPoints()));
-            paymentsState.put(bestPayment.getPaymentMethod(),
-                    paymentsState.get(
-                            bestPayment.getPaymentMethod()).subtract(
-                                    bestPayment.getOrderValue(dataBank)
-                    ).add(bestPayment.getLoyaltyPoints()));
-
-        }else{
-            paymentsState.put(bestPayment.getPaymentMethod(),
-                    bestPayment.getOrderValueWithDiscount(dataBank));
+        BigDecimal substract = paymentsState.get(dataBank.LOYALTY_POINTS_DISCOUNT_NAME).subtract(bestPayment.getLoyaltyPoints());
+        BigDecimal substract2 = paymentsState.get(bestPayment.getPaymentMethod()).subtract(bestPayment.getOrderValueWithDiscount(dataBank));
+        if(bestPayment.isPartialLoyaltyPoints(dataBank)) {
+            paymentsState.put(dataBank.LOYALTY_POINTS_DISCOUNT_NAME
+                    , substract);
         }
-
+            paymentsState.put(bestPayment.getPaymentMethod(),
+                    substract2);
     }
+
 
     private Pair<List<PaymentRealization>, HashMap<String, BigDecimal>> calculateBestPaymentForLastOrder(
             int orderIndex, HashMap<String, BigDecimal> paymentsState) {
@@ -93,9 +88,9 @@ public class BruteForceOptimizer implements DiscountOptimalizer{
                 currentDiscount = currentPayment.getDiscount(dataBank);
                 currentState = new HashMap<>(paymentsState);
                 updatePaymentsState(currentState, currentPayment);
-                Pair<List<PaymentRealization>, HashMap<String, BigDecimal>> tmp = getPaymentsCosts(n, i, currentState);
+                Pair<List<PaymentRealization>, HashMap<String, BigDecimal>> tmp = getPaymentsCosts(n, i+1, currentState);
                 currentDiscount = currentDiscount.add(this.getDiscountSum(tmp.getLeft()));
-                if (bestDiscount.equals(null) || currentDiscount.compareTo(bestDiscount) >= 0) {
+                if (bestDiscount == null || currentDiscount.compareTo(bestDiscount) >= 0) {
                     bestPayment = currentPayment;
                     bestDiscount = currentDiscount;
                     bestState = tmp.getRight();
@@ -109,9 +104,9 @@ public class BruteForceOptimizer implements DiscountOptimalizer{
                 currentDiscount = currentPayment.getDiscount(dataBank);
                 currentState = new HashMap<>(paymentsState);
                 updatePaymentsState(currentState, currentPayment);
-                Pair<List<PaymentRealization>, HashMap<String, BigDecimal>> tmp = getPaymentsCosts(n, i, currentState);
+                Pair<List<PaymentRealization>, HashMap<String, BigDecimal>> tmp = getPaymentsCosts(n, i+1, currentState);
                 currentDiscount = currentDiscount.add(this.getDiscountSum(tmp.getLeft()));
-                if (bestDiscount.equals(null) || currentDiscount.compareTo(bestDiscount) >= 0) {
+                if (bestDiscount == null || currentDiscount.compareTo(bestDiscount) >= 0) {
                     bestPayment = currentPayment;
                     bestDiscount = currentDiscount;
                     bestState = tmp.getRight();
