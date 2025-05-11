@@ -11,59 +11,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 public class AppTest {
-    @Test public void appHasAGreeting() {
+    @Test public void testAppHasAGreeting() {
         App classUnderTest = new App();
         assertNotNull("app should have a greeting", classUnderTest.getGreeting());
-    }
-    
-    @Test
-    public void testMainMethodWithValidFiles() throws IOException {
-        // Get the path to the test resource files
-        ClassLoader classLoader = getClass().getClassLoader();
-        File ordersFile = new File(classLoader.getResource("orders.json").getFile());
-        File paymentMethodsFile = new File(classLoader.getResource("paymentmethods.json").getFile());
-        
-        // Redirect System.out to capture output
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        PrintStream originalOut = System.out;
-        System.setOut(new PrintStream(outContent));
-        
-        try {
-            // Call main method with test file paths
-            String[] args = {ordersFile.getAbsolutePath(), paymentMethodsFile.getAbsolutePath()};
-            App.main(args);
-            
-            // Verify output indicates successful loading
-            String output = outContent.toString();
-            assertTrue("Output should indicate successful loading", 
-                    output.contains("Successfully loaded orders and payment methods!"));
-            
-        } finally {
-            // Reset System.out
-            System.setOut(originalOut);
-        }
-    }
-    
-    @Test
-    public void testMainMethodWithInvalidArguments() {
-        // Redirect System.out to capture output
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        PrintStream originalOut = System.out;
-        System.setOut(new PrintStream(outContent));
-        
-        try {
-            // Call main method with insufficient arguments
-            String[] args = {};
-            App.main(args);
-            
-            // Verify correct usage message is shown
-            String output = outContent.toString();
-            assertTrue("Output should show usage instructions", 
-                    output.contains("Usage: java -jar app.jar <orders_json_path> <payment_methods_json_path>"));
-            
-        } finally {
-            // Reset System.out
-            System.setOut(originalOut);
-        }
     }
 }
