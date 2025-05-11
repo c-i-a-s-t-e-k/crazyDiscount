@@ -61,7 +61,7 @@ public class DataBankTest {
         Set<String> expectedOrders = dataBank.getPaymentMethodsIds();
         Map<String, BigDecimal> maxOrders = dataBank.getMaxOrdersAmountPerPaymentMethod();
 
-        assertEquals(0, maxOrders.get("PUNKTY").compareTo(BigDecimal.ZERO));
+        assertEquals(0, maxOrders.get("PUNKTY").compareTo(new BigDecimal("500")));
         assertEquals(0, maxOrders.get("mZysk").compareTo(new BigDecimal("250")));
         assertEquals(0, maxOrders.get("BosBankrut").compareTo(new BigDecimal("350")));
     }

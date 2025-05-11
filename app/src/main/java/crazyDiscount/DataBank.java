@@ -1,15 +1,12 @@
 package crazyDiscount;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.tuple.Pair;
@@ -20,13 +17,22 @@ import crazyDiscount.model.Order;
 import crazyDiscount.model.Promotion;
 
 public class DataBank {
-    private List<Order> orders;
-    private Map<String, Promotion> paymentMethods;
+    public final String LOYALTY_POINTS_DISCOUNT_NAME = "PUNKTY";
+    public final BigDecimal LOYALTY_POINTS_DISCOUNT = new BigDecimal("0.10");
+    private final List<Order> orders;
+    private final Map<String, Promotion> paymentMethods;
 
     public DataBank(String ordersPath, String paymentMethodsPath) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         File ordersFile = new File(ordersPath);
         this.orders = objectMapper.readValue(ordersFile, new TypeReference<List<Order>>(){});
+        for (Order order : this.orders) {
+            if (order.getPromotions() == null) {
+                order.setPromotions(new ArrayList<>(Collections.singleton(LOYALTY_POINTS_DISCOUNT_NAME)));
+            }else if (! order.getPromotions().contains(LOYALTY_POINTS_DISCOUNT_NAME)) {
+                order.getPromotions().add(LOYALTY_POINTS_DISCOUNT_NAME);
+            }
+        }
 
         // Re-use objectMapper or create a new one if needed for different configurations
         File paymentMethodsFile = new File(paymentMethodsPath);
@@ -51,6 +57,15 @@ public class DataBank {
 
     public Promotion getPaymentMethod(String id) {
         return paymentMethods.get(id);
+    }
+
+    public Set<Integer> getUnusedOrderIds(Set<Integer> usedOrderIds) {
+        Set<Integer> allOrderIds = IntStream.rangeClosed(0, getOrdersSize()-1)
+                .boxed()
+                .collect(Collectors.toSet());
+
+        allOrderIds.removeAll(usedOrderIds);
+        return allOrderIds;
     }
 
     public Map<String, BigDecimal> getMaxOrdersAmountPerPaymentMethod() {

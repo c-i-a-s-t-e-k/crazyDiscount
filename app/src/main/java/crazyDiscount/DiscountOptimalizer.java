@@ -8,4 +8,6 @@ public interface DiscountOptimalizer {
     public void optimalize();
 
     public Map<String, BigDecimal> getPaymentMethodOptimalizatedCosts();
+
+    public boolean isOptimalized();
 }

@@ -1,5 +1,6 @@
 package crazyDiscount;
 
+import java.awt.desktop.SystemSleepEvent;
 import java.util.Set;
 import com.google.ortools.Loader;
 import com.google.ortools.algorithms.KnapsackSolver;
@@ -9,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.apache.commons.lang3.tuple.Pair;
 import crazyDiscount.model.Order;
 import crazyDiscount.model.Promotion;
@@ -23,17 +27,23 @@ public class HeuristicOptimizer implements DiscountOptimalizer {
         }
     }
 
-    private Set<Integer> calculatedOrders;
-    private Set<String> usedPaymentMethods;
-    private Map<String, BigDecimal> paymentUsageAmount;
-    private Map<String, BigDecimal> maxOrdersAmountPerPaymentMethod;
-    private DataBank dataBank;
+    private final Set<Integer> uncalculatedOrders;
+    private final Set<String> usedPaymentMethods;
+    private final Map<String, BigDecimal> paymentUsageAmount;
+    private final Map<String, BigDecimal> maxOrdersAmountPerPaymentMethod;
+    private final DataBank dataBank;
 
     public HeuristicOptimizer(DataBank dataBank) {
-        this.calculatedOrders = new HashSet<>();
+        this.dataBank = dataBank;
+        this.uncalculatedOrders = IntStream.rangeClosed(0, dataBank.getOrdersSize()-1)
+                .boxed()
+                .collect(Collectors.toSet());
+        System.out.println(uncalculatedOrders);
         this.usedPaymentMethods = new HashSet<>();
         this.paymentUsageAmount = new HashMap<>();
-        this.dataBank = dataBank;
+        for(String paymentId: dataBank.getPaymentMethodsIds()){
+            paymentUsageAmount.put(paymentId, BigDecimal.ZERO);
+        }
         this.maxOrdersAmountPerPaymentMethod = dataBank.getMaxOrdersAmountPerPaymentMethod();
 
     }
@@ -86,22 +96,24 @@ public class HeuristicOptimizer implements DiscountOptimalizer {
         return selectedOrderIds;
     }
 
+    private void spendLoyaltyPoints(){
+        // calculating special offert with loyalty points (10% discount for at least 10% loyalty points)
+//        BigDecimal loyaltyPoints = dataBank.getPaymentMethod(dataBank.LOYALTY_POINTS_DISCOUNT_NAME).getLimit()
+//                .subtract(paymentUsageAmount.get(dataBank.LOYALTY_POINTS_DISCOUNT_NAME));
+//        if (loyaltyPoints.compareTo(BigDecimal.ZERO) > 0) {
+//            for (Integer orderId : this.uncalculatedOrders) {
+//
+//            }
+//        }
+    }
+
     @Override
     public void optimalize() {
-        int totalOrdersCount = this.dataBank.getOrdersSize();
+        int ordersSize = this.dataBank.getOrdersSize();
         Set<String> allPromotionIds = this.dataBank.getPaymentMethodsIds();
 
-        while (this.calculatedOrders.size() < totalOrdersCount && this.usedPaymentMethods.size() < allPromotionIds.size()) {
-            Set<Integer> unusedOrderIds = new HashSet<>();
-            for (int i = 0; i < totalOrdersCount; i++) {
-                unusedOrderIds.add(i);
-            }
-            unusedOrderIds.removeAll(this.calculatedOrders);
-
-            if (unusedOrderIds.isEmpty()) {
-                break;
-            }
-
+        // calculating all regural promotion ("PUNKTY" included)
+        while (!this.uncalculatedOrders.isEmpty() && this.usedPaymentMethods.size() < allPromotionIds.size()) {
             Set<String> unusedPromotionIds = new HashSet<>(allPromotionIds);
             unusedPromotionIds.removeAll(this.usedPaymentMethods);
 
@@ -110,12 +122,13 @@ public class HeuristicOptimizer implements DiscountOptimalizer {
             }
 
             Pair<Promotion, List<Integer>> viablePromotionPair = this.dataBank.getMostVaiablePaymentMethod(
-                    unusedOrderIds,
+                    this.uncalculatedOrders,
                     unusedPromotionIds,
                     this.maxOrdersAmountPerPaymentMethod
             );
 
             if (viablePromotionPair == null || viablePromotionPair.getLeft() == null) {
+
                 break;
             }
 
@@ -130,8 +143,8 @@ public class HeuristicOptimizer implements DiscountOptimalizer {
                 BigDecimal promotionDiscountRate = currentPromotion.getDiscount();
 
                 for (Integer orderId : ordersToProcessForPromotion) {
-                    if (!this.calculatedOrders.contains(orderId)) {
-                        this.calculatedOrders.add(orderId);
+                    if (this.uncalculatedOrders.contains(orderId)) {
+                        this.uncalculatedOrders.remove(orderId);
                         Order processedOrder = this.dataBank.getOrder(orderId);
                         BigDecimal orderValue = processedOrder.getValue();
 
@@ -157,6 +170,12 @@ public class HeuristicOptimizer implements DiscountOptimalizer {
             }
             this.usedPaymentMethods.add(currentPromotionId);
         }
+        this.spendLoyaltyPoints();
+
+    }
+    @Override
+    public boolean isOptimalized(){
+        return this.uncalculatedOrders.isEmpty();
     }
 
     @Override
